@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backoffice — Учёт ошибок</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e11;
+    --surface: #17171c;
+    --surface2: #1f1f27;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --accent: #6c63ff;
+    --accent2: #a78bfa;
+    --text: #f0f0f5;
+    --text2: #9090a0;
+    --text3: #5a5a6a;
+    --success: #34d399;
+    --danger: #f87171;
+    --warning: #fbbf24;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* LOGIN PAGE */
+  #loginPage {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .login-glow {
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(108,99,255,0.15) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 24px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .login-box::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 25px;
+    background: linear-gradient(135deg, rgba(108,99,255,0.3), transparent 50%, rgba(167,139,250,0.1));
+    z-index: -1;
+  }
+
+  .login-logo {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .login-logo span {
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  .login-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+
+  .login-sub {
+    color: var(--text2);
+    font-size: 13px;
+    margin-bottom: 2.5rem;
+  }
+
+  .field {
+    margin-bottom: 1.25rem;
+  }
+
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--text2);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .field input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+  }
+
+  .field input::placeholder { color: var(--text3); }
+
+  .btn-login {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 13px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-login:hover { opacity: 0.9; }
+  .btn-login:active { transform: scale(0.99); }
+
+  .login-error {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 12px;
+    text-align: center;
+    display: none;
+  }
+
+  /* MAIN APP */
+  #appPage {
+    display: none;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 1rem;
+    z-index: 10;
+  }
+
+  .sidebar-logo {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    padding: 0 0.75rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sidebar-logo span {
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  .nav-section {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--text3);
+    text-transform: uppercase;
+    padding: 0 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 2px;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+
+  .nav-item.active {
+    color: var(--text);
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.25);
+  }
+
+  .nav-item .nav-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+  }
+
+  .sidebar-bottom {
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+  }
+
+  .logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    color: var(--text3);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+  }
+
+  .logout-btn:hover { color: var(--danger); background: rgba(248,113,113,0.08); }
+
+  /* MAIN CONTENT */
+  .main {
+    margin-left: 240px;
+    min-height: 100vh;
+    padding: 2.5rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .page-sub {
+    color: var(--text2);
+    font-size: 13px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 1.25rem;
+  }
+
+  /* STEP INDICATOR */
+  .steps {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1.75rem;
+  }
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  .step.active { color: var(--text); }
+  .step.done { color: var(--success); }
+
+  .step-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--text3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .step.active .step-dot { border-color: var(--accent); color: var(--accent); }
+  .step.done .step-dot { border-color: var(--success); background: var(--success); color: #fff; }
+
+  .step-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    max-width: 40px;
+  }
+
+  /* EMP GRID */
+  .emp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+  }
+
+  .emp-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .emp-card:hover { border-color: var(--border2); background: rgba(108,99,255,0.06); }
+
+  .emp-card.selected {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.12);
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(108,99,255,0.2);
+    color: var(--accent2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .emp-name {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  /* ERR GRID */
+  .err-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .err-chip {
+    padding: 9px 18px;
+    border-radius: 99px;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .err-chip:hover { border-color: var(--accent); color: var(--text); }
+
+  .err-chip.selected {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.15);
+    color: var(--text);
+  }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn:hover { background: var(--surface2); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .btn-primary:hover { opacity: 0.9; background: var(--accent); }
+  .btn-primary:disabled { opacity: 0.35; }
+
+  .btn-danger { border-color: rgba(248,113,113,0.3); color: var(--danger); }
+  .btn-danger:hover { background: rgba(248,113,113,0.08); }
+
+  .btn-success { border-color: rgba(52,211,153,0.3); color: var(--success); }
+
+  /* SUCCESS STATE */
+  .success-state {
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+
+  .success-icon {
+    font-size: 56px;
+    margin-bottom: 1rem;
+    animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .success-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .success-sub { color: var(--text2); font-size: 14px; margin-bottom: 2rem; }
+
+  /* LOG */
+  .log-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+
+  .log-item:last-child { border-bottom: none; }
+
+  .log-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .log-info { min-width: 0; }
+
+  .log-name {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .log-date { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(108,99,255,0.15);
+    color: var(--accent2);
+    border: 1px solid rgba(108,99,255,0.2);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* STATS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1.25rem;
+  }
+
+  .stat-num {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .stat-label { font-size: 12px; color: var(--text2); }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .td-name { color: var(--text); font-weight: 600; }
+  .td-num { text-align: center; }
+  .td-total { text-align: center; font-weight: 700; color: var(--text); }
+
+  /* EMPTY */
+  .empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text3);
+    font-size: 14px;
+  }
+
+  .empty-icon { font-size: 36px; margin-bottom: 12px; }
+
+  /* FILTER */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .filter-select:focus { border-color: var(--accent); }
+
+  /* SEPARATOR */
+  .sep {
+    height: 1px;
+    background: var(--border);
+    margin: 1.5rem 0;
+  }
+
+  .mt1 { margin-top: 1rem; }
+  .flex-gap { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ANIMATIONS */
+  .fade-in {
+    animation: fadeIn 0.25s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* MOBILE */
+  @media (max-width: 720px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 1.25rem; }
+    .mobile-nav {
+      display: flex !important;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 10;
+      padding: 8px 0 4px;
+    }
+    .main { padding-bottom: 80px; }
+  }
+
+  .mobile-nav {
+    display: none;
+  }
+
+  .mobile-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    color: var(--text3);
+    cursor: pointer;
+    padding: 4px;
+    border: none;
+    background: none;
+    transition: color 0.15s;
+  }
+
+  .mobile-nav-item.active { color: var(--accent2); }
+  .mobile-nav-item .nav-icon { font-size: 20px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage">
+  <div class="login-glow"></div>
+  <div class="login-box">
+    <div class="login-logo"><span></span>Backoffice</div>
+    <h1 class="login-title">Добро пожаловать</h1>
+    <p class="login-sub">Система учёта ошибок сотрудников</p>
+    <div class="field">
+      <label>Логин</label>
+      <input type="text" id="loginInput" placeholder="Введите логин" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Пароль</label>
+      <input type="password" id="passInput" placeholder="Введите пароль" autocomplete="current-password">
+    </div>
+    <button class="btn-login" onclick="doLogin()">Войти</button>
+    <div class="login-error" id="loginError">Неверный логин или пароль</div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="appPage">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo"><span></span>Backoffice</div>
+    <div class="nav-section">Меню</div>
+    <button class="nav-item active" onclick="showPage('fix', this)">
+      <span class="nav-icon">＋</span> Зафиксировать
+    </button>
+    <button class="nav-item" onclick="showPage('log', this)">
+      <span class="nav-icon">☰</span> Журнал
+    </button>
+    <button class="nav-item" onclick="showPage('stats', this)">
+      <span class="nav-icon">◎</span> Итоги
+    </button>
+    <div class="sidebar-bottom">
+      <button class="logout-btn" onclick="doLogout()">
+        <span>⎋</span> Выйти
+      </button>
+    </div>
+  </nav>
+
+  <!-- MOBILE NAV -->
+  <div class="mobile-nav" id="mobileNav">
+    <button class="mobile-nav-item active" onclick="showPage('fix', this)" id="mn-fix">
+      <span class="nav-icon">＋</span><span>Зафикс.</span>
+    </button>
+    <button class="mobile-nav-item" onclick="showPage('log', this)" id="mn-log">
+      <span class="nav-icon">☰</span><span>Журнал</span>
+    </button>
+    <button class="mobile-nav-item" onclick="showPage('stats', this)" id="mn-stats">
+      <span class="nav-icon">◎</span><span>Итоги</span>
+    </button>
+    <button class="mobile-nav-item" onclick="doLogout()">
+      <span class="nav-icon">⎋</span><span>Выйти</span>
+    </button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- FIX PAGE -->
+    <div id="pg-fix" class="fade-in">
+      <div class="page-header">
+        <h2 class="page-title">Зафиксировать ошибку</h2>
+        <p class="page-sub">Выберите сотрудника и тип ошибки</p>
+      </div>
+
+      <!-- STEP 1 -->
+      <div id="s1">
+        <div class="steps">
+          <div class="step active"><div class="step-dot">1</div><span>Сотрудник</span></div>
+          <div class="step-line"></div>
+          <div class="step"><div class="step-dot">2</div><span>Ошибка</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Выберите сотрудника</div>
+          <div class="emp-grid" id="empGrid"></div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div id="s2" style="display:none;">
+        <div class="steps">
+          <div class="step done"><div class="step-dot">✓</div><span>Сотрудник</span></div>
+          <div class="step-line"></div>
+          <div class="step active"><div class="step-dot">2</div><span>Ошибка</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Тип ошибки</div>
+          <div class="err-grid" id="errGrid"></div>
+        </div>
+        <div class="sep"></div>
+        <div class="flex-gap">
+          <button class="btn" onclick="goStep(1)">← Назад</button>
+          <button class="btn btn-primary" id="saveBtn" onclick="saveErr()" disabled>Сохранить ✓</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 SUCCESS -->
+      <div id="s3" style="display:none;">
+        <div class="card">
+          <div class="success-state">
+            <div class="success-icon">✅</div>
+            <div class="success-title" id="successTitle"></div>
+            <div class="success-sub" id="successSub"></div>
+            <div class="flex-gap" style="justify-content:center;">
+              <button class="btn btn-primary" onclick="resetFix()">Зафиксировать ещё</button>
+              <button class="btn btn-success" onclick="showPage('log', null)">Смотреть журнал →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOG PAGE -->
+    <div id="pg-log" style="display:none;" class="fade-in">
+      <div class="page-header">
+        <h2 class="page-title">Журнал ошибок</h2>
+        <p class="page-sub">Все зафиксированные записи</p>
+      </div>
+      <div class="filter-row">
+        <select class="filter-select" id="filterEmp" onchange="renderLog()">
+          <option value="">Все сотрудники</option>
+        </select>
+        <select class="filter-select" id="filterMonth" onchange="renderLog()">
+          <option value="">Все месяцы</option>
+        </select>
+        <button class="btn btn-danger" onclick="clearAll()" style="margin-left:auto;">🗑 Очистить всё</button>
+      </div>
+      <div class="card" id="logContainer"></div>
+    </div>
+
+    <!-- STATS PAGE -->
+    <div id="pg-stats" style="display:none;" class="fade-in">
+      <div class="page-header">
+        <h2 class="page-title">Итоги</h2>
+        <p class="page-sub">Статистика по сотрудникам</p>
+      </div>
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="card">
+        <div class="card-title">По сотрудникам</div>
+        <div class="table-wrap" id="statsTable"></div>
+      </div>
+      <div class="mt1">
+        <button class="btn btn-primary" onclick="exportExcel()">⬇ Скачать Excel</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const CREDS = { login: 'backoffice', pass: 'BfCokeafi' };
+
+const EMPLOYEES = [
+  'Асаналиева Элиза',
+  'Осмонова Айдана',
+  'Жаныбекова Мадина',
+  'Самибаева Аймончок'
+];
+
+const ERR_TYPES = ['Тест', 'Test'];
+
+const MONTHS_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+
+let errors = [];
+let selEmp = null;
+let selErr = null;
+let currentPage = 'fix';
+
+function loadErrors() {
+  try { errors = JSON.parse(localStorage.getItem('bo_errors') || '[]'); } catch(e) { errors = []; }
+}
+
+function saveErrors() {
+  localStorage.setItem('bo_errors', JSON.stringify(errors));
+}
+
+function getInitials(name) {
+  return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+
+function doLogin() {
+  const l = document.getElementById('loginInput').value.trim();
+  const p = document.getElementById('passInput').value;
+  if (l === CREDS.login && p === CREDS.pass) {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('appPage').style.display = 'block';
+    localStorage.setItem('bo_auth', '1');
+    initApp();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('passInput').value = '';
+  }
+}
+
+document.getElementById('passInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('loginInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function doLogout() {
+  localStorage.removeItem('bo_auth');
+  document.getElementById('appPage').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('loginInput').value = '';
+  document.getElementById('passInput').value = '';
+}
+
+function initApp() {
+  loadErrors();
+  buildEmpGrid();
+  buildErrGrid();
+  buildFilters();
+  renderLog();
+  renderStats();
+}
+
+function showPage(p, el) {
+  ['fix','log','stats'].forEach(id => {
+    document.getElementById('pg-'+id).style.display = id === p ? 'block' : 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-item').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  currentPage = p;
+  if (p === 'log') renderLog();
+  if (p === 'stats') renderStats();
+}
+
+function buildEmpGrid() {
+  const g = document.getElementById('empGrid');
+  g.innerHTML = EMPLOYEES.map(e => `
+    <div class="emp-card" onclick="selectEmp(this, '${e}')">
+      <div class="avatar">${getInitials(e)}</div>
+      <div class="emp-name">${e}</div>
+    </div>`).join('');
+}
+
+function buildErrGrid() {
+  const g = document.getElementById('errGrid');
+  g.innerHTML = ERR_TYPES.map(e => `
+    <div class="err-chip" onclick="selectErr(this, '${e}')">${e}</div>`).join('');
+}
+
+function buildFilters() {
+  const fe = document.getElementById('filterEmp');
+  EMPLOYEES.forEach(e => {
+    const o = document.createElement('option');
+    o.value = e; o.textContent = e;
+    fe.appendChild(o);
+  });
+}
+
+function selectEmp(el, name) {
+  document.querySelectorAll('.emp-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selEmp = name;
+  setTimeout(() => goStep(2), 200);
+}
+
+function selectErr(el, name) {
+  document.querySelectorAll('.err-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selErr = name;
+  document.getElementById('saveBtn').disabled = false;
+}
+
+function goStep(n) {
+  document.getElementById('s1').style.display = n === 1 ? 'block' : 'none';
+  document.getElementById('s2').style.display = n === 2 ? 'block' : 'none';
+  document.getElementById('s3').style.display = n === 3 ? 'block' : 'none';
+  if (n === 2) {
+    selErr = null;
+    document.querySelectorAll('.err-chip').forEach(c => c.classList.remove('selected'));
+    document.getElementById('saveBtn').disabled = true;
+  }
+}
+
+function saveErr() {
+  if (!selEmp || !selErr) return;
+  const now = new Date();
+  const entry = {
+    emp: selEmp,
+    err: selErr,
+    ts: now.toISOString(),
+    dateStr: now.toLocaleDateString('ru-RU') + ' ' + now.toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'})
+  };
+  errors.unshift(entry);
+  saveErrors();
+  document.getElementById('successTitle').textContent = selEmp;
+  document.getElementById('successSub').textContent = 'Ошибка «' + selErr + '» зафиксирована — ' + entry.dateStr;
+  goStep(3);
+}
+
+function resetFix() {
+  selEmp = null; selErr = null;
+  document.querySelectorAll('.emp-card').forEach(c => c.classList.remove('selected'));
+  goStep(1);
+}
+
+function renderLog() {
+  const empF = document.getElementById('filterEmp').value;
+  const monF = document.getElementById('filterMonth').value;
+
+  let list = errors.filter(e => {
+    if (empF && e.emp !== empF) return false;
+    if (monF) {
+      const d = new Date(e.ts);
+      const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+      if (key !== monF) return false;
+    }
+    return true;
+  });
+
+  const months = [...new Set(errors.map(e => {
+    const d = new Date(e.ts);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+  }))].sort().reverse();
+
+  const fm = document.getElementById('filterMonth');
+  const curMon = fm.value;
+  fm.innerHTML = '<option value="">Все месяцы</option>';
+  months.forEach(m => {
+    const [y, mo] = m.split('-');
+    const o = document.createElement('option');
+    o.value = m;
+    o.textContent = MONTHS_RU[parseInt(mo)-1] + ' ' + y;
+    if (m === curMon) o.selected = true;
+    fm.appendChild(o);
+  });
+
+  const c = document.getElementById('logContainer');
+  if (!list.length) {
+    c.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>Записей не найдено</div>';
+    return;
+  }
+
+  c.innerHTML = list.map((e,i) => `
+    <div class="log-item">
+      <div class="log-left">
+        <div class="avatar">${getInitials(e.emp)}</div>
+        <div class="log-info">
+          <div class="log-name">${e.emp}</div>
+          <div class="log-date">${e.dateStr}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <span class="badge">${e.err}</span>
+        <button class="btn btn-danger" onclick="deleteEntry(${errors.indexOf(e)})" style="padding:6px 10px;font-size:12px;">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function deleteEntry(i) {
+  if (confirm('Удалить запись?')) {
+    errors.splice(i, 1);
+    saveErrors();
+    renderLog();
+    renderStats();
+  }
+}
+
+function clearAll() {
+  if (!errors.length) return;
+  if (confirm('Очистить все записи?')) {
+    errors = [];
+    saveErrors();
+    renderLog();
+    renderStats();
+  }
+}
+
+function renderStats() {
+  const now = new Date();
+  const thisMonth = errors.filter(e => {
+    const d = new Date(e.ts);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-num">${errors.length}</div>
+      <div class="stat-label">Всего ошибок</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">${thisMonth.length}</div>
+      <div class="stat-label">${MONTHS_RU[now.getMonth()]} ${now.getFullYear()}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">${EMPLOYEES.length}</div>
+      <div class="stat-label">Сотрудников</div>
+    </div>`;
+
+  const byEmp = {};
+  EMPLOYEES.forEach(e => { byEmp[e] = {}; ERR_TYPES.forEach(t => byEmp[e][t] = 0); });
+  errors.forEach(e => { if (byEmp[e.emp]) byEmp[e.emp][e.err] = (byEmp[e.emp][e.err]||0)+1; });
+
+  const t = document.getElementById('statsTable');
+  if (!errors.length) {
+    t.innerHTML = '<div class="empty"><div class="empty-icon">📊</div>Данных пока нет</div>';
+    return;
+  }
+
+  let html = '<table><thead><tr><th>Сотрудник</th>';
+  ERR_TYPES.forEach(et => { html += `<th class="td-num">${et}</th>`; });
+  html += '<th class="td-num">Итого</th></tr></thead><tbody>';
+
+  EMPLOYEES.forEach(emp => {
+    const total = ERR_TYPES.reduce((s,et) => s + (byEmp[emp][et]||0), 0);
+    if (!total) return;
+    html += `<tr><td class="td-name">${emp}</td>`;
+    ERR_TYPES.forEach(et => { html += `<td class="td-num">${byEmp[emp][et] || '—'}</td>`; });
+    html += `<td class="td-total">${total}</td></tr>`;
+  });
+
+  html += '</tbody></table>';
+  t.innerHTML = html;
+}
+
+function exportExcel() {
+  if (!errors.length) { alert('Нет данных для экспорта'); return; }
+  const data = [['Дата', 'Сотрудник', 'Тип ошибки']];
+  errors.forEach(e => data.push([e.dateStr, e.emp, e.err]));
+
+  const byEmp = {};
+  EMPLOYEES.forEach(e => { byEmp[e] = {}; ERR_TYPES.forEach(t => byEmp[e][t] = 0); });
+  errors.forEach(e => { if (byEmp[e.emp]) byEmp[e.emp][e.err]=(byEmp[e.emp][e.err]||0)+1; });
+
+  const summary = [['Сотрудник', ...ERR_TYPES, 'Итого']];
+  EMPLOYEES.forEach(emp => {
+    const row = [emp, ...ERR_TYPES.map(et => byEmp[emp][et]||0)];
+    row.push(row.slice(1).reduce((a,b)=>a+b,0));
+    summary.push(row);
+  });
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), 'Журнал');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summary), 'Итоги');
+
+  const now = new Date();
+  XLSX.writeFile(wb, `ошибки_${now.getFullYear()}_${String(now.getMonth()+1).padStart(2,'0')}.xlsx`);
+}
+
+// AUTO LOGIN CHECK
+if (localStorage.getItem('bo_auth') === '1') {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('appPage').style.display = 'block';
+  initApp();
+}
+</script>
+</body>
+</html>
