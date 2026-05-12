@@ -845,6 +845,10 @@
         <h2 class="page-title">Итоги</h2>
         <p class="page-sub">Статистика по сотрудникам</p>
       </div>
+      <div class="filter-row">
+        <select class="filter-select" id="statsFilterMonth" onchange="renderStats()">
+        </select>
+      </div>
       <div class="stats-grid" id="statsGrid"></div>
       <div class="card">
         <div class="card-title">По сотрудникам</div>
@@ -1170,6 +1174,39 @@ async function clearAll() {
 
 function renderStats() {
   const now = new Date();
+  const curMonKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+
+  const sfEl = document.getElementById('statsFilterMonth');
+  if (!sfEl) return;
+
+  const months = [...new Set(errors.map(e => {
+    const d = new Date(e.ts);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+  }))].sort().reverse();
+
+  const prevVal = sfEl.value;
+  sfEl.innerHTML = '<option value="">Все время</option>';
+  months.forEach(m => {
+    const [y, mo] = m.split('-');
+    const o = document.createElement('option');
+    o.value = m;
+    o.textContent = MONTHS_RU[parseInt(mo)-1] + ' ' + y;
+    sfEl.appendChild(o);
+  });
+
+  if (!prevVal) {
+    if (months.includes(curMonKey)) sfEl.value = curMonKey;
+  } else {
+    sfEl.value = prevVal;
+  }
+
+  const monF = sfEl.value;
+  const filtered = monF ? errors.filter(e => {
+    const d = new Date(e.ts);
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    return key === monF;
+  }) : errors;
+
   const thisMonth = errors.filter(e => {
     const d = new Date(e.ts);
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
@@ -1181,8 +1218,8 @@ function renderStats() {
       <div class="stat-label">Всего ошибок</div>
     </div>
     <div class="stat-card">
-      <div class="stat-num">${thisMonth.length}</div>
-      <div class="stat-label">${MONTHS_RU[now.getMonth()]} ${now.getFullYear()}</div>
+      <div class="stat-num">${filtered.length}</div>
+      <div class="stat-label">${monF ? MONTHS_RU[parseInt(monF.split('-')[1])-1] + ' ' + monF.split('-')[0] : 'За все время'}</div>
     </div>
     <div class="stat-card">
       <div class="stat-num">${EMPLOYEES.length}</div>
@@ -1191,11 +1228,11 @@ function renderStats() {
 
   const byEmp = {};
   EMPLOYEES.forEach(e => { byEmp[e] = {}; ERR_TYPES.forEach(t => byEmp[e][t] = 0); });
-  errors.forEach(e => { if (byEmp[e.emp]) byEmp[e.emp][e.err] = (byEmp[e.emp][e.err]||0)+1; });
+  filtered.forEach(e => { if (byEmp[e.emp]) byEmp[e.emp][e.err] = (byEmp[e.emp][e.err]||0)+1; });
 
   const t = document.getElementById('statsTable');
-  if (!errors.length) {
-    t.innerHTML = '<div class="empty"><div class="empty-icon">📊</div>Данных пока нет</div>';
+  if (!filtered.length) {
+    t.innerHTML = '<div class="empty"><div class="empty-icon">📊</div>Данных за этот период нет</div>';
     return;
   }
 
@@ -1203,13 +1240,27 @@ function renderStats() {
   ERR_TYPES.forEach(et => { html += `<th class="td-num">${et}</th>`; });
   html += '<th class="td-num">Итого</th></tr></thead><tbody>';
 
+  const totalsRow = {};
+  ERR_TYPES.forEach(et => totalsRow[et] = 0);
+  let grandTotal = 0;
+
   EMPLOYEES.forEach(emp => {
     const total = ERR_TYPES.reduce((s,et) => s + (byEmp[emp][et]||0), 0);
     if (!total) return;
     html += `<tr><td class="td-name">${emp}</td>`;
-    ERR_TYPES.forEach(et => { html += `<td class="td-num">${byEmp[emp][et] || '—'}</td>`; });
+    ERR_TYPES.forEach(et => {
+      const v = byEmp[emp][et] || 0;
+      totalsRow[et] += v;
+      html += `<td class="td-num">${v || '—'}</td>`;
+    });
+    grandTotal += total;
     html += `<td class="td-total">${total}</td></tr>`;
   });
+
+  html += `<tr style="border-top: 2px solid var(--border2); background: rgba(108,99,255,0.06);">
+    <td style="padding:12px 14px; font-weight:700; font-size:13px; color:var(--accent2); letter-spacing:0.05em; text-transform:uppercase;">Всего</td>`;
+  ERR_TYPES.forEach(et => { html += `<td style="padding:12px 14px; text-align:center; font-weight:700; color:var(--accent2);">${totalsRow[et] || '—'}</td>`; });
+  html += `<td style="padding:12px 14px; text-align:center; font-weight:700; color:var(--accent2); font-size:15px;">${grandTotal}</td></tr>`;
 
   html += '</tbody></table>';
   t.innerHTML = html;
@@ -1258,6 +1309,7 @@ window.deleteEntry = deleteEntry;
 window.clearAll = clearAll;
 window.exportExcel = exportExcel;
 window.renderLog = renderLog;
+window.renderStats = renderStats;
 </script>
 </body>
 </html>
