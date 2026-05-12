@@ -1093,8 +1093,12 @@ function resetFix() {
 }
 
 function renderLog() {
-  const empF = document.getElementById('filterEmp').value;
-  const monF = document.getElementById('filterMonth').value;
+  const feEl = document.getElementById('filterEmp');
+  const fmEl = document.getElementById('filterMonth');
+  if (!feEl || !fmEl) return;
+
+  const empF = feEl.value;
+  const monF = fmEl.value;
 
   let list = errors.filter(e => {
     if (empF && e.emp !== empF) return false;
@@ -1253,6 +1257,7 @@ window.selectErrDrop = selectErrDrop;
 window.deleteEntry = deleteEntry;
 window.clearAll = clearAll;
 window.exportExcel = exportExcel;
+window.renderLog = renderLog;
 </script>
 </body>
 </html>
