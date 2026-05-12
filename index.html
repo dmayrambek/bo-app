@@ -423,32 +423,29 @@
     line-height: 1.3;
   }
 
-  /* ERR GRID */
-  .err-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .err-chip {
-    padding: 9px 18px;
-    border-radius: 99px;
-    border: 1px solid var(--border2);
+  /* ERR SELECT */
+  .err-select {
+    width: 100%;
+    max-width: 360px;
     background: var(--surface2);
-    color: var(--text2);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .err-chip:hover { border-color: var(--accent); color: var(--text); }
-
-  .err-chip.selected {
-    border-color: var(--accent);
-    background: rgba(108,99,255,0.15);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
     color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    padding: 12px 16px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239090a0' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px;
   }
+
+  .err-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,99,255,0.15); }
+  .err-select option { background: var(--surface2); color: var(--text); }
 
   /* BUTTONS */
   .btn {
@@ -797,7 +794,9 @@
         </div>
         <div class="card">
           <div class="card-title">Тип ошибки</div>
-          <div class="err-grid" id="errGrid"></div>
+          <select class="err-select" id="errSelect" onchange="selectErrDrop(this.value)">
+            <option value="">— Выберите тип ошибки —</option>
+          </select>
         </div>
         <div class="sep"></div>
         <div class="flex-gap">
@@ -947,9 +946,12 @@ function buildEmpGrid() {
 }
 
 function buildErrGrid() {
-  const g = document.getElementById('errGrid');
-  g.innerHTML = ERR_TYPES.map(e => `
-    <div class="err-chip" onclick="selectErr(this, '${e}')">${e}</div>`).join('');
+  const s = document.getElementById('errSelect');
+  ERR_TYPES.forEach(e => {
+    const o = document.createElement('option');
+    o.value = e; o.textContent = e;
+    s.appendChild(o);
+  });
 }
 
 function buildFilters() {
@@ -968,11 +970,9 @@ function selectEmp(el, name) {
   setTimeout(() => goStep(2), 200);
 }
 
-function selectErr(el, name) {
-  document.querySelectorAll('.err-chip').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  selErr = name;
-  document.getElementById('saveBtn').disabled = false;
+function selectErrDrop(val) {
+  selErr = val || null;
+  document.getElementById('saveBtn').disabled = !selErr;
 }
 
 function goStep(n) {
@@ -981,7 +981,7 @@ function goStep(n) {
   document.getElementById('s3').style.display = n === 3 ? 'block' : 'none';
   if (n === 2) {
     selErr = null;
-    document.querySelectorAll('.err-chip').forEach(c => c.classList.remove('selected'));
+    document.getElementById('errSelect').value = '';
     document.getElementById('saveBtn').disabled = true;
   }
 }
