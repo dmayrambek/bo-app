@@ -9,21 +9,22 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0e0e11;
-    --surface: #17171c;
-    --surface2: #1f1f27;
-    --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.14);
-    --accent: #6c63ff;
-    --accent2: #a78bfa;
-    --text: #f0f0f5;
-    --text2: #9090a0;
-    --text3: #5a5a6a;
-    --success: #34d399;
-    --danger: #f87171;
-    --warning: #fbbf24;
+    --bg: #f7f4ef;
+    --surface: #fdfcfa;
+    --surface2: #ede9e0;
+    --border: rgba(0,0,0,0.07);
+    --border2: rgba(0,0,0,0.12);
+    --accent: #c96a2e;
+    --accent2: #e8824a;
+    --text: #1e1a16;
+    --text2: #7a6e63;
+    --text3: #b0a89e;
+    --success: #2d9e6b;
+    --danger: #c94040;
     --radius: 14px;
     --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
   }
 
   body {
@@ -35,36 +36,23 @@
     line-height: 1.6;
   }
 
-  /* NOISE TEXTURE */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.4;
-  }
-
-  /* LOGIN PAGE */
+  /* LOGIN */
   #loginPage {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 2rem;
+    background: var(--bg);
     position: relative;
-    z-index: 1;
   }
 
-  .login-glow {
+  #loginPage::before {
+    content: '';
     position: fixed;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(108,99,255,0.15) 0%, transparent 70%);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(201,106,46,0.08) 0%, transparent 70%);
+    top: -100px; right: -100px;
     pointer-events: none;
   }
 
@@ -75,17 +63,9 @@
     padding: 3rem;
     width: 100%;
     max-width: 420px;
+    box-shadow: var(--shadow);
     position: relative;
     z-index: 1;
-  }
-
-  .login-box::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: 25px;
-    background: linear-gradient(135deg, rgba(108,99,255,0.3), transparent 50%, rgba(167,139,250,0.1));
-    z-index: -1;
   }
 
   .login-logo {
@@ -93,7 +73,7 @@
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.2em;
-    color: var(--accent2);
+    color: var(--accent);
     text-transform: uppercase;
     margin-bottom: 2rem;
     display: flex;
@@ -102,12 +82,9 @@
   }
 
   .login-logo span {
-    width: 6px;
-    height: 6px;
+    width: 7px; height: 7px;
     background: var(--accent);
     border-radius: 50%;
-    display: inline-block;
-    box-shadow: 0 0 10px var(--accent);
   }
 
   .login-title {
@@ -115,45 +92,40 @@
     font-size: 22px;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    line-height: 1.3;
+    color: var(--text);
   }
 
-  .login-sub {
-    color: var(--text2);
-    font-size: 13px;
-    margin-bottom: 2.5rem;
-  }
+  .login-sub { color: var(--text2); font-size: 13px; margin-bottom: 2.5rem; }
 
-  .field {
-    margin-bottom: 1.25rem;
-  }
+  .field { margin-bottom: 1.25rem; }
 
   .field label {
     display: block;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    color: var(--text2);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text3);
     text-transform: uppercase;
-    margin-bottom: 8px;
+    margin-bottom: 7px;
   }
 
   .field input {
     width: 100%;
     background: var(--surface2);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border2);
     border-radius: var(--radius-sm);
     color: var(--text);
     font-family: 'Manrope', sans-serif;
     font-size: 15px;
     padding: 12px 16px;
     outline: none;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
 
   .field input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+    box-shadow: 0 0 0 3px rgba(201,106,46,0.12);
+    background: var(--surface);
   }
 
   .field input::placeholder { color: var(--text3); }
@@ -171,41 +143,27 @@
     cursor: pointer;
     margin-top: 0.5rem;
     transition: opacity 0.2s, transform 0.1s;
-    letter-spacing: 0.02em;
   }
 
-  .btn-login:hover { opacity: 0.9; }
+  .btn-login:hover { opacity: 0.88; }
   .btn-login:active { transform: scale(0.99); }
 
-  .login-error {
-    color: var(--danger);
-    font-size: 13px;
-    margin-top: 12px;
-    text-align: center;
-    display: none;
-  }
+  .login-error { color: var(--danger); font-size: 13px; margin-top: 12px; text-align: center; display: none; }
 
-  /* MAIN APP */
-  #appPage {
-    display: none;
-    min-height: 100vh;
-    position: relative;
-    z-index: 1;
-  }
+  /* APP */
+  #appPage { display: none; min-height: 100vh; }
 
-  /* SIDEBAR */
   .sidebar {
     position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
+    left: 0; top: 0; bottom: 0;
     width: 240px;
     background: var(--surface);
-    border-right: 1px solid var(--border);
+    border-right: 1px solid var(--border2);
     display: flex;
     flex-direction: column;
     padding: 1.5rem 1rem;
     z-index: 10;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.04);
   }
 
   .sidebar-logo {
@@ -213,7 +171,7 @@
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.2em;
-    color: var(--accent2);
+    color: var(--accent);
     text-transform: uppercase;
     padding: 0 0.75rem;
     margin-bottom: 2.5rem;
@@ -222,13 +180,7 @@
     gap: 8px;
   }
 
-  .sidebar-logo span {
-    width: 6px;
-    height: 6px;
-    background: var(--accent);
-    border-radius: 50%;
-    box-shadow: 0 0 10px var(--accent);
-  }
+  .sidebar-logo span { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; }
 
   .nav-section {
     font-size: 10px;
@@ -261,16 +213,13 @@
   .nav-item:hover { color: var(--text); background: var(--surface2); }
 
   .nav-item.active {
-    color: var(--text);
-    background: rgba(108,99,255,0.15);
-    border: 1px solid rgba(108,99,255,0.25);
+    color: var(--accent);
+    background: rgba(201,106,46,0.08);
+    border: 1px solid rgba(201,106,46,0.18);
+    font-weight: 600;
   }
 
-  .nav-item .nav-icon {
-    font-size: 16px;
-    width: 20px;
-    text-align: center;
-  }
+  .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
 
   .sidebar-bottom {
     margin-top: auto;
@@ -293,71 +242,53 @@
     width: 100%;
   }
 
-  .logout-btn:hover { color: var(--danger); background: rgba(248,113,113,0.08); }
+  .logout-btn:hover { color: var(--danger); background: rgba(201,64,64,0.06); }
 
-  /* MAIN CONTENT */
   .main {
     margin-left: 240px;
     min-height: 100vh;
     padding: 2.5rem;
+    background: var(--bg);
   }
 
-  .page-header {
-    margin-bottom: 2rem;
-  }
+  .page-header { margin-bottom: 2rem; }
 
   .page-title {
     font-family: 'Unbounded', sans-serif;
     font-size: 20px;
     font-weight: 700;
     margin-bottom: 4px;
+    color: var(--text);
   }
 
-  .page-sub {
-    color: var(--text2);
-    font-size: 13px;
-  }
+  .page-sub { color: var(--text2); font-size: 13px; }
 
-  /* CARDS */
   .card {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border2);
     border-radius: var(--radius);
     padding: 1.5rem;
     margin-bottom: 1.25rem;
+    box-shadow: var(--shadow-sm);
   }
 
   .card-title {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--text2);
+    color: var(--text3);
     margin-bottom: 1.25rem;
   }
 
-  /* STEP INDICATOR */
-  .steps {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 1.75rem;
-  }
+  .steps { display: flex; align-items: center; gap: 8px; margin-bottom: 1.75rem; }
 
-  .step {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--text3);
-  }
-
+  .step { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); }
   .step.active { color: var(--text); }
   .step.done { color: var(--success); }
 
   .step-dot {
-    width: 20px;
-    height: 20px;
+    width: 20px; height: 20px;
     border-radius: 50%;
     border: 1.5px solid var(--text3);
     display: flex;
@@ -369,24 +300,13 @@
 
   .step.active .step-dot { border-color: var(--accent); color: var(--accent); }
   .step.done .step-dot { border-color: var(--success); background: var(--success); color: #fff; }
+  .step-line { flex: 1; height: 1px; background: var(--border2); max-width: 40px; }
 
-  .step-line {
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-    max-width: 40px;
-  }
-
-  /* EMP GRID */
-  .emp-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 10px;
-  }
+  .emp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
 
   .emp-card {
     background: var(--surface2);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border2);
     border-radius: var(--radius-sm);
     padding: 14px 16px;
     cursor: pointer;
@@ -396,19 +316,19 @@
     gap: 12px;
   }
 
-  .emp-card:hover { border-color: var(--border2); background: rgba(108,99,255,0.06); }
+  .emp-card:hover { border-color: var(--accent); background: rgba(201,106,46,0.05); }
 
   .emp-card.selected {
     border-color: var(--accent);
-    background: rgba(108,99,255,0.12);
+    background: rgba(201,106,46,0.08);
+    box-shadow: 0 0 0 2px rgba(201,106,46,0.15);
   }
 
   .avatar {
-    width: 36px;
-    height: 36px;
+    width: 36px; height: 36px;
     border-radius: 50%;
-    background: rgba(108,99,255,0.2);
-    color: var(--accent2);
+    background: rgba(201,106,46,0.12);
+    color: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -417,13 +337,8 @@
     flex-shrink: 0;
   }
 
-  .emp-name {
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.3;
-  }
+  .emp-name { font-size: 13px; font-weight: 600; line-height: 1.3; color: var(--text); }
 
-  /* ERR SELECT */
   .err-select {
     width: 100%;
     max-width: 360px;
@@ -438,16 +353,15 @@
     cursor: pointer;
     transition: border-color 0.2s;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239090a0' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a6e63' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
     padding-right: 40px;
   }
 
-  .err-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,99,255,0.15); }
-  .err-select option { background: var(--surface2); color: var(--text); }
+  .err-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(201,106,46,0.1); }
+  .err-select option { background: var(--surface); color: var(--text); }
 
-  /* BUTTONS */
   .btn {
     display: inline-flex;
     align-items: center;
@@ -455,59 +369,37 @@
     padding: 10px 18px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border2);
-    background: transparent;
+    background: var(--surface);
     color: var(--text);
     font-family: 'Manrope', sans-serif;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.15s;
+    box-shadow: var(--shadow-sm);
   }
 
   .btn:hover { background: var(--surface2); }
   .btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-  .btn-primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: none; }
+  .btn-primary:hover { opacity: 0.88; background: var(--accent); }
 
-  .btn-primary:hover { opacity: 0.9; background: var(--accent); }
-  .btn-primary:disabled { opacity: 0.35; }
+  .btn-danger { border-color: rgba(201,64,64,0.25); color: var(--danger); background: transparent; box-shadow: none; }
+  .btn-danger:hover { background: rgba(201,64,64,0.06); }
 
-  .btn-danger { border-color: rgba(248,113,113,0.3); color: var(--danger); }
-  .btn-danger:hover { background: rgba(248,113,113,0.08); }
+  .btn-success { border-color: rgba(45,158,107,0.3); color: var(--success); background: transparent; box-shadow: none; }
+  .btn-success:hover { background: rgba(45,158,107,0.06); }
 
-  .btn-success { border-color: rgba(52,211,153,0.3); color: var(--success); }
+  .success-state { text-align: center; padding: 3rem 1rem; }
 
-  /* SUCCESS STATE */
-  .success-state {
-    text-align: center;
-    padding: 3rem 1rem;
-  }
+  .success-icon { font-size: 56px; margin-bottom: 1rem; animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-  .success-icon {
-    font-size: 56px;
-    margin-bottom: 1rem;
-    animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
+  @keyframes pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
-  @keyframes pop {
-    0% { transform: scale(0); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
-  .success-title {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-
+  .success-title { font-family: 'Unbounded', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
   .success-sub { color: var(--text2); font-size: 14px; margin-bottom: 2rem; }
 
-  /* LOG */
   .log-item {
     display: flex;
     align-items: center;
@@ -518,25 +410,9 @@
   }
 
   .log-item:last-child { border-bottom: none; }
-
-  .log-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-    min-width: 0;
-  }
-
+  .log-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
   .log-info { min-width: 0; }
-
-  .log-name {
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
+  .log-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
   .log-date { font-size: 12px; color: var(--text3); margin-top: 2px; }
 
   .badge {
@@ -546,45 +422,28 @@
     border-radius: 99px;
     font-size: 12px;
     font-weight: 600;
-    background: rgba(108,99,255,0.15);
-    color: var(--accent2);
-    border: 1px solid rgba(108,99,255,0.2);
+    background: rgba(201,106,46,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(201,106,46,0.2);
     white-space: nowrap;
     flex-shrink: 0;
   }
 
-  /* STATS */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-bottom: 1.5rem;
-  }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
 
   .stat-card {
-    background: var(--surface2);
-    border: 1px solid var(--border);
+    background: var(--surface);
+    border: 1px solid var(--border2);
     border-radius: var(--radius-sm);
     padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
   }
 
-  .stat-num {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-
+  .stat-num { font-family: 'Unbounded', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 4px; color: var(--accent); }
   .stat-label { font-size: 12px; color: var(--text2); }
 
-  /* TABLE */
   .table-wrap { overflow-x: auto; }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
 
   thead th {
     text-align: left;
@@ -594,43 +453,26 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text3);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border2);
+    background: var(--surface2);
   }
 
-  tbody td {
-    padding: 12px 14px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text2);
-  }
-
+  tbody td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--text2); }
   tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover td { background: rgba(255,255,255,0.02); }
+  tbody tr:hover td { background: rgba(201,106,46,0.03); }
 
   .td-name { color: var(--text); font-weight: 600; }
   .td-num { text-align: center; }
   .td-total { text-align: center; font-weight: 700; color: var(--text); }
 
-  /* EMPTY */
-  .empty {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: var(--text3);
-    font-size: 14px;
-  }
-
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--text3); font-size: 14px; }
   .empty-icon { font-size: 36px; margin-bottom: 12px; }
 
-  /* FILTER */
-  .filter-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 1.25rem;
-    flex-wrap: wrap;
-  }
+  .filter-row { display: flex; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
 
   .filter-select {
-    background: var(--surface2);
-    border: 1px solid var(--border);
+    background: var(--surface);
+    border: 1px solid var(--border2);
     border-radius: var(--radius-sm);
     color: var(--text);
     font-family: 'Manrope', sans-serif;
@@ -639,48 +481,33 @@
     outline: none;
     cursor: pointer;
     transition: border-color 0.15s;
+    box-shadow: var(--shadow-sm);
   }
 
   .filter-select:focus { border-color: var(--accent); }
 
-  /* SEPARATOR */
-  .sep {
-    height: 1px;
-    background: var(--border);
-    margin: 1.5rem 0;
-  }
-
+  .sep { height: 1px; background: var(--border); margin: 1.5rem 0; }
   .mt1 { margin-top: 1rem; }
   .flex-gap { display: flex; gap: 8px; flex-wrap: wrap; }
 
-  /* ANIMATIONS */
-  .fade-in {
-    animation: fadeIn 0.25s ease;
-  }
+  .fade-in { animation: fadeIn 0.25s ease; }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* MOBILE */
   @media (max-width: 720px) {
     .sidebar { display: none; }
-    .main { margin-left: 0; padding: 1.25rem; }
-    .mobile-nav {
-      display: flex !important;
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      z-index: 10;
-      padding: 8px 0 4px;
-    }
-    .main { padding-bottom: 80px; }
+    .main { margin-left: 0; padding: 1.25rem; padding-bottom: 80px; }
+    .mobile-nav { display: flex !important; }
   }
 
   .mobile-nav {
     display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border2);
+    z-index: 10;
+    padding: 8px 0 4px;
   }
 
   .mobile-nav-item {
@@ -698,15 +525,13 @@
     transition: color 0.15s;
   }
 
-  .mobile-nav-item.active { color: var(--accent2); }
+  .mobile-nav-item.active { color: var(--accent); }
   .mobile-nav-item .nav-icon { font-size: 20px; }
 </style>
 </head>
 <body>
 
-<!-- LOGIN PAGE -->
 <div id="loginPage">
-  <div class="login-glow"></div>
   <div class="login-box">
     <div class="login-logo"><span></span>Backoffice</div>
     <h1 class="login-title">Добро пожаловать</h1>
@@ -724,9 +549,7 @@
   </div>
 </div>
 
-<!-- MAIN APP -->
 <div id="appPage">
-  <!-- SIDEBAR -->
   <nav class="sidebar">
     <div class="sidebar-logo"><span></span>Backoffice</div>
     <div class="nav-section">Меню</div>
@@ -740,21 +563,18 @@
       <span class="nav-icon">◎</span> Итоги
     </button>
     <div class="sidebar-bottom">
-      <button class="logout-btn" onclick="doLogout()">
-        <span>⎋</span> Выйти
-      </button>
+      <button class="logout-btn" onclick="doLogout()"><span>⎋</span> Выйти</button>
     </div>
   </nav>
 
-  <!-- MOBILE NAV -->
-  <div class="mobile-nav" id="mobileNav">
-    <button class="mobile-nav-item active" onclick="showPage('fix', this)" id="mn-fix">
+  <div class="mobile-nav">
+    <button class="mobile-nav-item active" onclick="showPage('fix', this)">
       <span class="nav-icon">＋</span><span>Зафикс.</span>
     </button>
-    <button class="mobile-nav-item" onclick="showPage('log', this)" id="mn-log">
+    <button class="mobile-nav-item" onclick="showPage('log', this)">
       <span class="nav-icon">☰</span><span>Журнал</span>
     </button>
-    <button class="mobile-nav-item" onclick="showPage('stats', this)" id="mn-stats">
+    <button class="mobile-nav-item" onclick="showPage('stats', this)">
       <span class="nav-icon">◎</span><span>Итоги</span>
     </button>
     <button class="mobile-nav-item" onclick="doLogout()">
@@ -762,17 +582,12 @@
     </button>
   </div>
 
-  <!-- MAIN CONTENT -->
   <main class="main">
-
-    <!-- FIX PAGE -->
     <div id="pg-fix" class="fade-in">
       <div class="page-header">
         <h2 class="page-title">Зафиксировать ошибку</h2>
         <p class="page-sub">Выберите сотрудника и тип ошибки</p>
       </div>
-
-      <!-- STEP 1 -->
       <div id="s1">
         <div class="steps">
           <div class="step active"><div class="step-dot">1</div><span>Сотрудник</span></div>
@@ -784,8 +599,6 @@
           <div class="emp-grid" id="empGrid"></div>
         </div>
       </div>
-
-      <!-- STEP 2 -->
       <div id="s2" style="display:none;">
         <div class="steps">
           <div class="step done"><div class="step-dot">✓</div><span>Сотрудник</span></div>
@@ -804,8 +617,6 @@
           <button class="btn btn-primary" id="saveBtn" onclick="saveErr()" disabled>Сохранить ✓</button>
         </div>
       </div>
-
-      <!-- STEP 3 SUCCESS -->
       <div id="s3" style="display:none;">
         <div class="card">
           <div class="success-state">
@@ -821,7 +632,6 @@
       </div>
     </div>
 
-    <!-- LOG PAGE -->
     <div id="pg-log" style="display:none;" class="fade-in">
       <div class="page-header">
         <h2 class="page-title">Журнал ошибок</h2>
@@ -839,15 +649,13 @@
       <div class="card" id="logContainer"></div>
     </div>
 
-    <!-- STATS PAGE -->
     <div id="pg-stats" style="display:none;" class="fade-in">
       <div class="page-header">
         <h2 class="page-title">Итоги</h2>
         <p class="page-sub">Статистика по сотрудникам</p>
       </div>
       <div class="filter-row">
-        <select class="filter-select" id="statsFilterMonth" onchange="renderStats()">
-        </select>
+        <select class="filter-select" id="statsFilterMonth" onchange="renderStats()"></select>
       </div>
       <div class="stats-grid" id="statsGrid"></div>
       <div class="card">
@@ -858,7 +666,6 @@
         <button class="btn btn-primary" onclick="exportExcel()">⬇ Скачать Excel</button>
       </div>
     </div>
-
   </main>
 </div>
 
@@ -873,30 +680,20 @@ const firebaseConfig = {
   projectId: "bo-app-40be5",
   storageBucket: "bo-app-40be5.firebasestorage.app",
   messagingSenderId: "736090343662",
-  appId: "1:736090343662:web:270e3b25e684e73da34bff",
-  measurementId: "G-H153GH0MHD"
+  appId: "1:736090343662:web:270e3b25e684e73da34bff"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const CREDS = { login: 'backoffice', pass: 'BfCokeafi' };
-
-const EMPLOYEES = [
-  'Асаналиева Элиза',
-  'Осмонова Айдана',
-  'Жаныбекова Мадина',
-  'Самибаева Аймончок'
-];
-
+const EMPLOYEES = ['Асаналиева Элиза','Осмонова Айдана','Жаныбекова Мадина','Самибаева Аймончок'];
 const ERR_TYPES = ['Тест', 'Test'];
-
 const MONTHS_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 
 let errors = [];
 let selEmp = null;
 let selErr = null;
-let currentPage = 'fix';
 
 async function loadErrors() {
   try {
@@ -915,14 +712,14 @@ async function saveErrors(entry) {
 }
 
 async function deleteFromDB(id) {
-  try { await deleteDoc(doc(db, 'errors', id)); } catch(e) { console.error(e); }
+  try { await deleteDoc(doc(db, 'errors', id)); } catch(e) {}
 }
 
 async function clearAllFromDB() {
   try {
     const snap = await getDocs(collection(db, 'errors'));
     await Promise.all(snap.docs.map(d => deleteDoc(doc(db, 'errors', d.id))));
-  } catch(e) { console.error(e); }
+  } catch(e) {}
 }
 
 function getInitials(name) {
@@ -1018,7 +815,6 @@ function showPage(p, el) {
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.mobile-nav-item').forEach(b => b.classList.remove('active'));
   if (el) el.classList.add('active');
-  currentPage = p;
   if (p === 'log') renderLog();
   if (p === 'stats') renderStats();
 }
@@ -1079,8 +875,7 @@ async function saveErr() {
   document.getElementById('saveBtn').textContent = 'Сохранение...';
   const now = new Date();
   const entry = {
-    emp: selEmp,
-    err: selErr,
+    emp: selEmp, err: selErr,
     ts: now.toISOString(),
     dateStr: now.toLocaleDateString('ru-RU') + ' ' + now.toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'})
   };
@@ -1100,10 +895,8 @@ function renderLog() {
   const feEl = document.getElementById('filterEmp');
   const fmEl = document.getElementById('filterMonth');
   if (!feEl || !fmEl) return;
-
   const empF = feEl.value;
   const monF = fmEl.value;
-
   let list = errors.filter(e => {
     if (empF && e.emp !== empF) return false;
     if (monF) {
@@ -1113,12 +906,10 @@ function renderLog() {
     }
     return true;
   });
-
   const months = [...new Set(errors.map(e => {
     const d = new Date(e.ts);
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
   }))].sort().reverse();
-
   const fm = document.getElementById('filterMonth');
   const curMon = fm.value;
   fm.innerHTML = '<option value="">Все месяцы</option>';
@@ -1130,14 +921,9 @@ function renderLog() {
     if (m === curMon) o.selected = true;
     fm.appendChild(o);
   });
-
   const c = document.getElementById('logContainer');
-  if (!list.length) {
-    c.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>Записей не найдено</div>';
-    return;
-  }
-
-  c.innerHTML = list.map((e,i) => `
+  if (!list.length) { c.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>Записей не найдено</div>'; return; }
+  c.innerHTML = list.map(e => `
     <div class="log-item">
       <div class="log-left">
         <div class="avatar">${getInitials(e.emp)}</div>
@@ -1157,8 +943,7 @@ async function deleteEntry(id) {
   if (confirm('Удалить запись?')) {
     await deleteFromDB(id);
     errors = errors.filter(e => e.id !== id);
-    renderLog();
-    renderStats();
+    renderLog(); renderStats();
   }
 }
 
@@ -1167,23 +952,19 @@ async function clearAll() {
   if (confirm('Очистить все записи?')) {
     await clearAllFromDB();
     errors = [];
-    renderLog();
-    renderStats();
+    renderLog(); renderStats();
   }
 }
 
 function renderStats() {
   const now = new Date();
   const curMonKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
-
   const sfEl = document.getElementById('statsFilterMonth');
   if (!sfEl) return;
-
   const months = [...new Set(errors.map(e => {
     const d = new Date(e.ts);
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
   }))].sort().reverse();
-
   const prevVal = sfEl.value;
   sfEl.innerHTML = '<option value="">Все время</option>';
   months.forEach(m => {
@@ -1193,104 +974,63 @@ function renderStats() {
     o.textContent = MONTHS_RU[parseInt(mo)-1] + ' ' + y;
     sfEl.appendChild(o);
   });
-
-  if (!prevVal) {
-    if (months.includes(curMonKey)) sfEl.value = curMonKey;
-  } else {
-    sfEl.value = prevVal;
-  }
-
+  if (!prevVal) { if (months.includes(curMonKey)) sfEl.value = curMonKey; }
+  else sfEl.value = prevVal;
   const monF = sfEl.value;
   const filtered = monF ? errors.filter(e => {
     const d = new Date(e.ts);
-    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
-    return key === monF;
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') === monF;
   }) : errors;
-
-  const thisMonth = errors.filter(e => {
-    const d = new Date(e.ts);
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  });
-
   document.getElementById('statsGrid').innerHTML = `
-    <div class="stat-card">
-      <div class="stat-num">${errors.length}</div>
-      <div class="stat-label">Всего ошибок</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num">${filtered.length}</div>
-      <div class="stat-label">${monF ? MONTHS_RU[parseInt(monF.split('-')[1])-1] + ' ' + monF.split('-')[0] : 'За все время'}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num">${EMPLOYEES.length}</div>
-      <div class="stat-label">Сотрудников</div>
-    </div>`;
-
+    <div class="stat-card"><div class="stat-num">${errors.length}</div><div class="stat-label">Всего ошибок</div></div>
+    <div class="stat-card"><div class="stat-num">${filtered.length}</div><div class="stat-label">${monF ? MONTHS_RU[parseInt(monF.split('-')[1])-1]+' '+monF.split('-')[0] : 'За все время'}</div></div>
+    <div class="stat-card"><div class="stat-num">${EMPLOYEES.length}</div><div class="stat-label">Сотрудников</div></div>`;
   const byEmp = {};
   EMPLOYEES.forEach(e => { byEmp[e] = {}; ERR_TYPES.forEach(t => byEmp[e][t] = 0); });
   filtered.forEach(e => { if (byEmp[e.emp]) byEmp[e.emp][e.err] = (byEmp[e.emp][e.err]||0)+1; });
-
   const t = document.getElementById('statsTable');
-  if (!filtered.length) {
-    t.innerHTML = '<div class="empty"><div class="empty-icon">📊</div>Данных за этот период нет</div>';
-    return;
-  }
-
+  if (!filtered.length) { t.innerHTML = '<div class="empty"><div class="empty-icon">📊</div>Данных за этот период нет</div>'; return; }
   let html = '<table><thead><tr><th>Сотрудник</th>';
   ERR_TYPES.forEach(et => { html += `<th class="td-num">${et}</th>`; });
   html += '<th class="td-num">Итого</th></tr></thead><tbody>';
-
-  const totalsRow = {};
-  ERR_TYPES.forEach(et => totalsRow[et] = 0);
+  const totalsRow = {}; ERR_TYPES.forEach(et => totalsRow[et] = 0);
   let grandTotal = 0;
-
   EMPLOYEES.forEach(emp => {
     const total = ERR_TYPES.reduce((s,et) => s + (byEmp[emp][et]||0), 0);
     if (!total) return;
     html += `<tr><td class="td-name">${emp}</td>`;
-    ERR_TYPES.forEach(et => {
-      const v = byEmp[emp][et] || 0;
-      totalsRow[et] += v;
-      html += `<td class="td-num">${v || '—'}</td>`;
-    });
+    ERR_TYPES.forEach(et => { const v = byEmp[emp][et]||0; totalsRow[et]+=v; html += `<td class="td-num">${v||'—'}</td>`; });
     grandTotal += total;
     html += `<td class="td-total">${total}</td></tr>`;
   });
-
-  html += `<tr style="border-top: 2px solid var(--border2); background: rgba(108,99,255,0.06);">
-    <td style="padding:12px 14px; font-weight:700; font-size:13px; color:var(--accent2); letter-spacing:0.05em; text-transform:uppercase;">Всего</td>`;
-  ERR_TYPES.forEach(et => { html += `<td style="padding:12px 14px; text-align:center; font-weight:700; color:var(--accent2);">${totalsRow[et] || '—'}</td>`; });
-  html += `<td style="padding:12px 14px; text-align:center; font-weight:700; color:var(--accent2); font-size:15px;">${grandTotal}</td></tr>`;
-
+  html += `<tr style="border-top:2px solid var(--border2);background:rgba(201,106,46,0.05);">
+    <td style="padding:12px 14px;font-weight:700;color:var(--accent);">Всего</td>`;
+  ERR_TYPES.forEach(et => { html += `<td style="padding:12px 14px;text-align:center;font-weight:700;color:var(--accent);">${totalsRow[et]||'—'}</td>`; });
+  html += `<td style="padding:12px 14px;text-align:center;font-weight:700;color:var(--accent);font-size:15px;">${grandTotal}</td></tr>`;
   html += '</tbody></table>';
   t.innerHTML = html;
 }
 
 function exportExcel() {
   if (!errors.length) { alert('Нет данных для экспорта'); return; }
-  const data = [['Дата', 'Сотрудник', 'Тип ошибки']];
+  const data = [['Дата','Сотрудник','Тип ошибки']];
   errors.forEach(e => data.push([e.dateStr, e.emp, e.err]));
-
   const byEmp = {};
   EMPLOYEES.forEach(e => { byEmp[e] = {}; ERR_TYPES.forEach(t => byEmp[e][t] = 0); });
   errors.forEach(e => { if (byEmp[e.emp]) byEmp[e.emp][e.err]=(byEmp[e.emp][e.err]||0)+1; });
-
   const summary = [['Сотрудник', ...ERR_TYPES, 'Итого']];
   EMPLOYEES.forEach(emp => {
     const row = [emp, ...ERR_TYPES.map(et => byEmp[emp][et]||0)];
     row.push(row.slice(1).reduce((a,b)=>a+b,0));
     summary.push(row);
   });
-
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), 'Журнал');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summary), 'Итоги');
-
   const now = new Date();
   XLSX.writeFile(wb, `ошибки_${now.getFullYear()}_${String(now.getMonth()+1).padStart(2,'0')}.xlsx`);
 }
 
-// AUTO LOGIN CHECK
 if (localStorage.getItem('bo_auth') === '1') {
   document.getElementById('loginPage').style.display = 'none';
   document.getElementById('appPage').style.display = 'block';
